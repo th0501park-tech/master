@@ -1,0 +1,169 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-black text-gray-900">
+                {% if product %}상품 수정: [{{ product.item_code }}] {{ product.name }}{% else %}새 캘린더 상품 등록{% endif %}
+            </h1>
+            <p class="text-xs text-gray-500 mt-1">캘린더의 규격, 매수, 인쇄란 크기 및 썸네일 이미지를 입력해 주세요.</p>
+        </div>
+        <a href="/admin/products" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">
+            목록으로 돌아가기
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+        <form action="{% if product %}/admin/products/{{ product.id }}/edit{% else %}/admin/products/new{% endif %}" method="post" class="space-y-6">
+
+            <!-- Category & Item Code -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">카테고리 분류 <span class="text-red-500">*</span></label>
+                    <select name="category_id" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white">
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">상품 코드 <span class="text-red-500">*</span></label>
+                    <input 
+                        type="text" 
+                        name="item_code" 
+                        required 
+                        value="{{ product.item_code if product else '' }}"
+                        placeholder="예: LD01, WI001, DM001" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            <!-- Name & Price -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">상품명 <span class="text-red-500">*</span></label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        required 
+                        value="{{ product.name if product else '' }}"
+                        placeholder="예: 한국의 대자연, 장용길 작품집" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">권당 정가 (원) <span class="text-red-500">*</span></label>
+                    <input 
+                        type="number" 
+                        name="price" 
+                        required 
+                        value="{{ product.price if product else 0 }}"
+                        placeholder="0 (0이면 '별도견적문의')" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            <!-- Dimensions & Sheets -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">규격 (크기)</label>
+                    <input 
+                        type="text" 
+                        name="dimensions" 
+                        value="{{ product.dimensions if product else '' }}"
+                        placeholder="예: 1,000mm X 700mm 또는 250mm X 185mm" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">매수</label>
+                    <input 
+                        type="text" 
+                        name="sheets" 
+                        value="{{ product.sheets if product else '' }}"
+                        placeholder="예: 13매, 7매, 14매" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            <!-- Paper & Binding -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">용지 / 지질</label>
+                    <input 
+                        type="text" 
+                        name="paper_type" 
+                        value="{{ product.paper_type if product else '' }}"
+                        placeholder="예: 아트지 / 옵셋 4도 또는 스노우화이트" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">제본 방식</label>
+                    <input 
+                        type="text" 
+                        name="binding" 
+                        value="{{ product.binding if product else '' }}"
+                        placeholder="예: P.V.C 홀더, 트윈스프링, 금박" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            <!-- Imprint Size & Thumbnail URL -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">상호 인쇄란 규격</label>
+                    <input 
+                        type="text" 
+                        name="imprint_size" 
+                        value="{{ product.imprint_size if product else '' }}"
+                        placeholder="예: 180mm X 50mm" 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">대표 썸네일 이미지 URL</label>
+                    <input 
+                        type="text" 
+                        name="thumbnail_url" 
+                        value="{{ product.thumbnail_url if product else '' }}"
+                        placeholder="http://... 또는 /static/images/..." 
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5">상품 설명</label>
+                <textarea 
+                    name="description" 
+                    rows="4" 
+                    placeholder="본 캘린더의 특징, 음력/절후 표기 여부 등을 작성해 주세요."
+                    class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                >{{ product.description if product else '' }}</textarea>
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-4 flex justify-end space-x-3">
+                <a href="/admin/products" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">
+                    취소
+                </a>
+                <button type="submit" class="px-7 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition">
+                    {% if product %}변경사항 저장하기{% else %}새 상품 등록 완료{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

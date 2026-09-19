@@ -1,0 +1,78 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div>
+        <h1 class="text-xl font-black text-gray-900">Q&A 질문 및 답변 관리</h1>
+        <p class="text-xs text-gray-500 mt-1">고객님들이 남겨주신 질문을 확인하고 바로 답변을 작성할 수 있습니다.</p>
+    </div>
+
+    <!-- Questions Table with Inline Reply Modal/Drawer -->
+    <div class="space-y-4">
+        {% if posts %}
+        {% for p in posts %}
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+            <!-- Header Row -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold 
+                        {% if p.status == '답변완료' %}bg-emerald-100 text-emerald-700
+                        {% else %}bg-amber-100 text-amber-700 animate-pulse{% endif %}">
+                        {{ p.status }}
+                    </span>
+                    <span class="text-xs font-bold text-blue-600">[{{ p.category }}]</span>
+                    <h3 class="font-bold text-sm text-gray-900">{{ p.title }}</h3>
+                    {% if p.is_secret %}
+                    <span class="text-amber-500 text-[11px]" title="비밀글"><i class="fa-solid fa-lock"></i></span>
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-400 space-x-2">
+                    <span>작성자: <strong>{{ p.author }}</strong></span>
+                    <span>|</span>
+                    <span>등록일: {{ p.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    <span>|</span>
+                    <span>조회: {{ p.views }}</span>
+                </div>
+            </div>
+
+            <!-- Question Content -->
+            <div class="p-4 bg-gray-50 rounded-xl text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                {{ p.content }}
+            </div>
+
+            <!-- Existing Answer or Reply Form -->
+            <div class="pt-2">
+                <form action="/admin/qna/{{ p.id }}/reply" method="post" class="space-y-3">
+                    <label class="block text-xs font-bold text-gray-700">
+                        <i class="fa-solid fa-reply text-blue-600 mr-1.5"></i>관리자 답변 작성
+                    </label>
+                    <textarea 
+                        name="admin_answer" 
+                        rows="3" 
+                        required 
+                        placeholder="고객님께 전달할 답변 내용을 작성하세요."
+                        class="w-full px-3.5 py-2.5 bg-blue-50/40 border border-blue-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >{{ p.admin_answer or '' }}</textarea>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-gray-400">
+                            {% if p.answered_at %}최근 답변일시: {{ p.answered_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+                        </span>
+                        <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition">
+                            {% if p.admin_answer %}답변 수정하기{% else %}답변 등록 완료{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="bg-white rounded-2xl p-12 text-center border border-gray-200 text-gray-400">
+            등록된 질문이 없습니다.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

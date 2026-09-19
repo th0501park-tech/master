@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">About Us</span>
+        <h1 class="text-3xl font-black text-gray-900 mt-1">보성문화카렌다사 소개</h1>
+        <p class="text-sm text-gray-500 mt-2 leading-relaxed">
+            대한민국 인쇄·출판의 중심 을지로에서 20여 년간 정직과 신뢰로 캘린더를 제작해 온 보성문화카렌다사입니다.
+        </p>
+    </div>
+
+    <!-- Company Info Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
+            <i class="fa-solid fa-building text-blue-600 mr-2"></i>사업장 및 연락처 안내
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+            <div class="p-4 bg-gray-50 rounded-xl">
+                <span class="text-xs text-gray-400 block font-semibold">상호명 / 대표자</span>
+                <span class="text-base font-bold text-gray-900 mt-0.5 block">{{ settings.COMPANY_NAME }} (대표: {{ settings.CEO_NAME }})</span>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+                <span class="text-xs text-gray-400 block font-semibold">사업자등록번호 / 통신판매번호</span>
+                <span class="text-base font-bold text-gray-900 mt-0.5 block">{{ settings.BIZ_NUMBER }} / {{ settings.MAIL_ORDER_NUMBER }}</span>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+                <span class="text-xs text-gray-400 block font-semibold">대표 전화 (고객센터)</span>
+                <span class="text-base font-bold text-amber-600 mt-0.5 block">{{ settings.TEL }}</span>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+                <span class="text-xs text-gray-400 block font-semibold">팩스 (시안 접수용)</span>
+                <span class="text-base font-bold text-gray-900 mt-0.5 block">{{ settings.FAX }}</span>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-gray-100">
+            <div class="flex items-start space-x-3">
+                <i class="fa-solid fa-location-dot text-red-500 text-lg mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-sm">오시는 길</h3>
+                    <p class="text-sm text-gray-600 mt-1">{{ settings.ADDRESS }}</p>
+                    <p class="text-xs text-gray-400 mt-1">지하철 2호선·3호선 을지로3가역 인근 (동아빌딩 201호)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick CTA -->
+    <div class="text-center">
+        <a href="/quotes/new" class="inline-flex items-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow transition">
+            <i class="fa-solid fa-calculator mr-2"></i>온라인 견적 문의하기
+        </a>
+    </div>
+
+</div>
+{% endblock %}

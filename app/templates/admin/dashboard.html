@@ -1,0 +1,144 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-8">
+
+    <!-- Top Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+        <!-- Card 1: Products -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">등록된 캘린더 상품</span>
+                <span class="text-3xl font-black text-gray-900 mt-1 block">{{ stats.total_products }}개</span>
+                <a href="/admin/products" class="text-xs text-blue-600 font-semibold mt-2 inline-block hover:underline">
+                    상품 및 가격 관리 바로가기 →
+                </a>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+        </div>
+
+        <!-- Card 2: Quotes -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">온라인 견적 문의</span>
+                <div class="flex items-baseline space-x-2 mt-1">
+                    <span class="text-3xl font-black text-gray-900">{{ stats.total_quotes }}건</span>
+                    {% if stats.pending_quotes > 0 %}
+                    <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full animate-pulse">
+                        대기 {{ stats.pending_quotes }}
+                    </span>
+                    {% endif %}
+                </div>
+                <a href="/admin/quotes" class="text-xs text-blue-600 font-semibold mt-2 inline-block hover:underline">
+                    견적 문의 목록 보기 →
+                </a>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-calculator"></i>
+            </div>
+        </div>
+
+        <!-- Card 3: Q&A -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">고객 질문과 답변 (Q&A)</span>
+                <div class="flex items-baseline space-x-2 mt-1">
+                    <span class="text-3xl font-black text-gray-900">{{ stats.total_qna }}건</span>
+                    {% if stats.pending_qna > 0 %}
+                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                        미답변 {{ stats.pending_qna }}
+                    </span>
+                    {% endif %}
+                </div>
+                <a href="/admin/qna" class="text-xs text-blue-600 font-semibold mt-2 inline-block hover:underline">
+                    Q&A 답변 등록하기 →
+                </a>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Recent Tables Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Recent Quotes -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm text-gray-900 flex items-center">
+                    <i class="fa-solid fa-calculator text-emerald-600 mr-2"></i>최근 접수된 견적 문의
+                </h3>
+                <a href="/admin/quotes" class="text-xs text-blue-600 hover:underline">전체보기</a>
+            </div>
+            <div class="divide-y divide-gray-100 text-xs">
+                {% if stats.recent_quotes %}
+                {% for q in stats.recent_quotes %}
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold 
+                                {% if q.status == '완료' %}bg-emerald-100 text-emerald-700
+                                {% elif q.status == '상담중' %}bg-amber-100 text-amber-700
+                                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ q.status }}
+                            </span>
+                            <span class="font-bold text-gray-800">{{ q.author_name }}</span>
+                            <span class="text-gray-400 truncate max-w-[180px]">{{ q.title }}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">
+                            상품: {{ q.product_name or '선택안함' }} | 수량: {{ q.quantity or '-' }}부
+                        </p>
+                    </div>
+                    <span class="text-[11px] text-gray-400 whitespace-nowrap">{{ q.created_at.strftime('%m-%d %H:%M') }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="py-6 text-center text-gray-400">접수된 견적 내역이 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Q&A -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm text-gray-900 flex items-center">
+                    <i class="fa-solid fa-comments text-purple-600 mr-2"></i>최근 고객 Q&A 질문
+                </h3>
+                <a href="/admin/qna" class="text-xs text-blue-600 hover:underline">전체보기</a>
+            </div>
+            <div class="divide-y divide-gray-100 text-xs">
+                {% if stats.recent_qna %}
+                {% for item in stats.recent_qna %}
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold 
+                                {% if item.status == '답변완료' %}bg-emerald-100 text-emerald-700
+                                {% else %}bg-red-100 text-red-700{% endif %}">
+                                {{ item.status }}
+                            </span>
+                            <span class="font-bold text-gray-800">{{ item.author }}</span>
+                            <span class="text-gray-600 truncate max-w-[180px]">{{ item.title }}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">분류: {{ item.category }}</p>
+                    </div>
+                    <a href="/admin/qna" class="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg hover:bg-blue-100 transition whitespace-nowrap">
+                        답변하기
+                    </a>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="py-6 text-center text-gray-400">등록된 질문이 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <div>
+        <h1 class="text-xl font-black text-gray-900">온라인 견적 및 주문 문의 관리</h1>
+        <p class="text-xs text-gray-500 mt-1">접수된 견적 요청의 상세 내용, 연락처, 희망 수량을 확인하고 상태를 변경할 수 있습니다.</p>
+    </div>
+
+    <!-- Quotes Cards -->
+    <div class="space-y-4">
+        {% if quotes %}
+        {% for q in quotes %}
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold 
+                        {% if q.status == '완료' or q.status == '답변완료' %}bg-emerald-100 text-emerald-700
+                        {% elif q.status == '상담중' %}bg-amber-100 text-amber-700
+                        {% else %}bg-gray-100 text-gray-700{% endif %}">
+                        {{ q.status }}
+                    </span>
+                    <span class="text-xs font-bold text-blue-700">[{{ q.inquiry_type }}]</span>
+                    <h3 class="font-bold text-sm text-gray-900">{{ q.title }}</h3>
+                </div>
+                <span class="text-xs text-gray-400">접수일: {{ q.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+
+            <!-- Customer & Product Info Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl text-xs">
+                <div>
+                    <span class="text-gray-400 block font-semibold">신청자 / 회사명</span>
+                    <span class="font-bold text-gray-900 mt-0.5 block">{{ q.author_name }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block font-semibold">연락처</span>
+                    <span class="font-bold text-blue-600 mt-0.5 block">
+                        <i class="fa-solid fa-phone mr-1"></i>{{ q.phone or '미입력' }}
+                    </span>
+                    {% if q.email %}
+                    <span class="text-[11px] text-gray-500 block">{{ q.email }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <span class="text-gray-400 block font-semibold">희망 상품 및 수량</span>
+                    <span class="font-bold text-gray-900 mt-0.5 block">{{ q.product_name or '선택안함' }}</span>
+                    <span class="text-amber-600 font-extrabold text-xs block">
+                        {% if q.quantity %}{{ "{:,}".format(q.quantity) }}부{% else %}수량 미지정{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <span class="text-xs font-bold text-gray-500 block mb-1">상세 문의 내용 / 인쇄 요청 문구:</span>
+                <div class="p-4 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 leading-relaxed whitespace-pre-line">
+                    {{ q.content or q.title }}
+                </div>
+            </div>
+
+            <!-- Status & Memo Form -->
+            <form action="/admin/quotes/{{ q.id }}/update" method="post" class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-bold text-gray-600 whitespace-nowrap">진행상태:</label>
+                    <select name="status" class="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-bold">
+                        <option value="대기" {% if q.status == '대기' %}selected{% endif %}>대기</option>
+                        <option value="상담중" {% if q.status == '상담중' %}selected{% endif %}>상담중</option>
+                        <option value="완료" {% if q.status == '완료' or q.status == '답변완료' %}selected{% endif %}>완료</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <input 
+                        type="text" 
+                        name="admin_reply" 
+                        value="{{ q.admin_reply or '' }}"
+                        placeholder="관리자 메모 또는 상담 내용 (예: 10/12 전화상담 완료, 500부 견적서 발송)"
+                        class="w-full px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs"
+                    >
+                </div>
+                <button type="submit" class="px-4 py-1.5 bg-slate-800 hover:bg-black text-white text-xs font-bold rounded-lg transition whitespace-nowrap">
+                    상태 업데이트
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="bg-white rounded-2xl p-12 text-center border border-gray-200 text-gray-400">
+            접수된 견적 문의가 없습니다.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

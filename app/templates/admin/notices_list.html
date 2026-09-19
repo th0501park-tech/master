@@ -1,0 +1,92 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-8">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-black text-gray-900">공지사항 관리</h1>
+            <p class="text-xs text-gray-500 mt-1">쇼핑몰 메인 및 공지 게시판에 노출되는 공지사항을 등록/삭제할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <!-- Create New Notice Form -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <h3 class="font-bold text-sm text-gray-900 flex items-center">
+            <i class="fa-solid fa-pen-nib text-blue-600 mr-2"></i>새 공지사항 등록
+        </h3>
+        <form action="/admin/notices/new" method="post" class="space-y-4">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div class="flex-1">
+                    <input 
+                        type="text" 
+                        name="title" 
+                        required 
+                        placeholder="공지사항 제목을 입력하세요."
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="inline-flex items-center cursor-pointer text-xs font-bold text-gray-700">
+                        <input type="checkbox" name="is_pinned" class="w-4 h-4 text-blue-600 rounded border-gray-300">
+                        <span class="ml-2">상단 고정 공지</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <textarea 
+                    name="content" 
+                    rows="4" 
+                    required 
+                    placeholder="공지사항 상세 내용을 입력하세요."
+                    class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                ></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition">
+                    공지사항 등록하기
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Existing Notices List -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100 font-bold text-xs text-gray-700">
+            등록된 공지사항 목록 (총 {{ posts|length }}건)
+        </div>
+        <div class="divide-y divide-gray-100 text-xs">
+            {% if posts %}
+            {% for post in posts %}
+            <div class="p-4 flex items-center justify-between hover:bg-gray-50/50 transition">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        {% if post.is_pinned %}
+                        <span class="px-2 py-0.5 bg-red-100 text-red-700 font-bold text-[10px] rounded">상단고정</span>
+                        {% endif %}
+                        <h4 class="font-bold text-gray-900 text-sm">{{ post.title }}</h4>
+                    </div>
+                    <p class="text-gray-500 line-clamp-1 text-[11px]">{{ post.content }}</p>
+                    <div class="text-gray-400 text-[10px] space-x-2">
+                        <span>등록일: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span>|</span>
+                        <span>조회수: {{ post.views }}</span>
+                    </div>
+                </div>
+                <div>
+                    <form action="/admin/notices/{{ post.id }}/delete" method="post" onsubmit="return confirm('정말 이 공지사항을 삭제하시겠습니까?');">
+                        <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-bold text-xs transition">
+                            삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="p-12 text-center text-gray-400">등록된 공지사항이 없습니다.</div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

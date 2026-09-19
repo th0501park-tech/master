@@ -1,0 +1,860 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- Top Alert Notifications -->
+    {% if request.query_params.get('excel_imported') %}
+    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start space-x-3 text-emerald-900 shadow-sm animate-fade-in">
+        <div class="p-1.5 bg-emerald-500 text-white rounded-xl mt-0.5">
+            <i class="fa-solid fa-file-excel text-sm"></i>
+        </div>
+        <div class="flex-1 text-xs">
+            <h4 class="font-bold text-sm text-emerald-800">엑셀 일괄 등록 완료</h4>
+            <p class="mt-0.5 text-emerald-700">
+                신규 등록 <strong>{{ request.query_params.get('created', 0) }}건</strong>, 
+                기존 정보 업데이트 <strong>{{ request.query_params.get('updated', 0) }}건</strong>이 성공적으로 처리되었습니다.
+                {% if request.query_params.get('failed', 0)|int > 0 %}
+                (실패: <span class="text-rose-600 font-bold">{{ request.query_params.get('failed') }}건</span>)
+                {% endif %}
+            </p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    {% if excel_error_msg %}
+    <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start space-x-3 text-rose-900 shadow-sm">
+        <div class="p-1.5 bg-rose-500 text-white rounded-xl mt-0.5">
+            <i class="fa-solid fa-circle-exclamation text-sm"></i>
+        </div>
+        <div class="flex-1 text-xs">
+            <h4 class="font-bold text-sm text-rose-800">엑셀 파일 처리 오류</h4>
+            <p class="mt-0.5 text-rose-700">{{ excel_error_msg }}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    {% if excel_errors %}
+    <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 shadow-sm space-y-2">
+        <div class="flex items-center space-x-2 font-bold text-xs text-amber-800">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+            <span>엑셀 처리 중 일부 행에 오류가 발생하여 제외되었습니다 (총 {{ excel_errors|length }}건):</span>
+        </div>
+        <ul class="list-disc list-inside text-xs text-amber-700 space-y-1 pl-2">
+            {% for err in excel_errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if request.query_params.get('bulk_deleted') %}
+    <div class="p-4 bg-slate-800 text-white rounded-2xl flex items-center justify-between text-xs shadow-md">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-trash-can text-rose-400"></i>
+            <span>선택하신 <strong>{{ request.query_params.get('count', 0) }}개</strong>의 상품이 삭제(비활성화)되었습니다.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    {% if request.query_params.get('bulk_price_updated') %}
+    <div class="p-4 bg-blue-50 border border-blue-200 text-blue-900 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-tags text-blue-600"></i>
+            <span>선택하신 <strong>{{ request.query_params.get('count', 0) }}개</strong> 상품의 가격이 성공적으로 일괄 변경되었습니다.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-blue-400 hover:text-blue-600">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    {% if request.query_params.get('bulk_category_updated') %}
+    <div class="p-4 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-folder-tree text-indigo-600"></i>
+            <span>선택하신 <strong>{{ request.query_params.get('count', 0) }}개</strong> 상품의 카테고리가 일괄 변경되었습니다.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-indigo-400 hover:text-indigo-600">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Header & Action Buttons -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+            <h1 class="text-xl font-black text-gray-900 flex items-center">
+                <span>캘린더 상품 및 가격 관리</span>
+                <span class="ml-3 px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                    총 {{ products|length }}개
+                </span>
+            </h1>
+            <p class="text-xs text-gray-500 mt-1">체크박스를 선택하여 일괄 삭제·가격변경을 하거나, 엑셀 파일을 통해 다수의 상품을 한번에 등록할 수 있습니다.</p>
+        </div>
+        
+        <!-- Action Buttons Group -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- 엑셀 양식 다운로드 버튼 -->
+            <a href="/admin/products/template" class="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center">
+                <i class="fa-solid fa-file-arrow-down text-emerald-600 mr-1.5 text-sm"></i>엑셀 양식 다운로드
+            </a>
+
+            <!-- 엑셀 일괄 등록 버튼 (모달 오픈) -->
+            <button type="button" onclick="openExcelModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center">
+                <i class="fa-solid fa-file-excel mr-1.5 text-sm"></i>엑셀 일괄 등록
+            </button>
+
+            <!-- 현재 상품목록 엑셀 다운로드 -->
+            <a href="/admin/products/export?category_id={{ selected_category_id or '' }}&search={{ search or '' }}" class="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl shadow-sm transition flex items-center" title="현재 조건의 상품 전체를 엑셀 파일로 저장">
+                <i class="fa-solid fa-download text-blue-600 mr-1.5"></i>목록 엑셀 저장
+            </a>
+
+            <!-- 새 단건 상품 등록하기 버튼 -->
+            <a href="/admin/products/new" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center">
+                <i class="fa-solid fa-plus mr-1.5"></i>새 상품 등록
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search & Sort Bar -->
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <span class="text-xs font-bold text-gray-500 whitespace-nowrap">분류:</span>
+            <select onchange="location.href='/admin/products?category_id=' + this.value + '&search={{ search }}&sort_by={{ sort_by }}&order={{ order }}'" class="py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                <option value="">전체 카테고리 ({{ products|length }}개)</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+
+            <span class="text-xs font-bold text-gray-500 whitespace-nowrap ml-1">정렬:</span>
+            <select onchange="applySorting(this.value)" class="py-2 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                <option value="id_asc" {% if sort_by == 'id' and order == 'asc' %}selected{% endif %}>등록순 (ID 오름차순)</option>
+                <option value="id_desc" {% if sort_by == 'id' and order == 'desc' %}selected{% endif %}>최신순 (ID 내림차순)</option>
+                <option value="price_asc" {% if sort_by == 'price' and order == 'asc' %}selected{% endif %}>가격 낮은순 (▲)</option>
+                <option value="price_desc" {% if sort_by == 'price' and order == 'desc' %}selected{% endif %}>가격 높은순 (▼)</option>
+                <option value="code_asc" {% if sort_by == 'code' and order == 'asc' %}selected{% endif %}>상품코드순 (A-Z)</option>
+                <option value="code_desc" {% if sort_by == 'code' and order == 'desc' %}selected{% endif %}>상품코드 역순 (Z-A)</option>
+                <option value="name_asc" {% if sort_by == 'name' and order == 'asc' %}selected{% endif %}>상품명 (가나다순)</option>
+                <option value="name_desc" {% if sort_by == 'name' and order == 'desc' %}selected{% endif %}>상품명 (역순)</option>
+            </select>
+
+            {% if selected_category_id or search or sort_by != 'id' or order != 'asc' %}
+            <a href="/admin/products" class="text-xs text-blue-600 hover:underline px-2 py-1">
+                초기화
+            </a>
+            {% endif %}
+        </div>
+        <form method="get" class="w-full lg:w-80 relative">
+            {% if selected_category_id %}
+            <input type="hidden" name="category_id" value="{{ selected_category_id }}">
+            {% endif %}
+            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            <input type="hidden" name="order" value="{{ order }}">
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search }}" 
+                placeholder="상품코드 또는 상품명 검색..." 
+                class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+            >
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+        </form>
+    </div>
+
+    <!-- Sticky Bulk Actions Toolbar (체크박스 선택 시 활성화) -->
+    <div id="bulkActionBar" class="hidden sticky top-4 z-20 bg-slate-900 text-white rounded-2xl p-4 shadow-xl border border-slate-700 flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
+                <span id="selectedBadge">0</span>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-white block">선택된 상품 <span id="selectedCountText" class="text-blue-400">0</span>개</span>
+                <span class="text-[11px] text-slate-400">일괄 작업을 적용할 기능을 선택하세요.</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- 가격 일괄 변경 버튼 -->
+            <button type="button" onclick="openBulkPriceModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition flex items-center shadow-sm">
+                <i class="fa-solid fa-tags mr-1.5"></i>가격 일괄 변경
+            </button>
+
+            <!-- 카테고리 일괄 이동 버튼 -->
+            <button type="button" onclick="openBulkCategoryModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center shadow-sm">
+                <i class="fa-solid fa-folder-tree mr-1.5"></i>카테고리 일괄 이동
+            </button>
+
+            <!-- 선택 일괄 삭제 버튼 -->
+            <button type="button" onclick="executeBulkDelete()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center shadow-sm">
+                <i class="fa-solid fa-trash-can mr-1.5"></i>선택 삭제
+            </button>
+
+            <!-- 선택 해제 버튼 -->
+            <button type="button" onclick="deselectAll()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition border border-slate-700">
+                선택 해제
+            </button>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200 select-none">
+                    <tr>
+                        <!-- 전체 선택 체크박스 -->
+                        <th class="py-3.5 px-4 w-12 text-center">
+                            <input 
+                                type="checkbox" 
+                                id="selectAllCheckbox" 
+                                onchange="toggleSelectAll(this)" 
+                                class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer"
+                                title="전체 선택/해제"
+                            >
+                        </th>
+                        <!-- ID 정렬 -->
+                        <th class="py-3.5 px-3 w-16 text-center cursor-pointer hover:bg-blue-50/70 transition group" onclick="sortBy('id')" title="ID 기준 정렬">
+                            <div class="inline-flex items-center justify-center space-x-1">
+                                <span>ID</span>
+                                {% if sort_by == 'id' %}
+                                    <i class="fa-solid {% if order == 'asc' %}fa-arrow-up-1-9 text-blue-600{% else %}fa-arrow-down-9-1 text-blue-600{% endif %}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort text-gray-300 group-hover:text-gray-500"></i>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="py-3.5 px-3 w-18 text-center">이미지</th>
+                        <!-- 상품코드 정렬 -->
+                        <th class="py-3.5 px-4 w-32 cursor-pointer hover:bg-blue-50/70 transition group" onclick="sortBy('code')" title="상품코드 기준 정렬">
+                            <div class="flex items-center justify-between">
+                                <span>상품코드</span>
+                                {% if sort_by == 'code' %}
+                                    <i class="fa-solid {% if order == 'asc' %}fa-arrow-up-a-z text-blue-600{% else %}fa-arrow-down-z-a text-blue-600{% endif %}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort text-gray-300 group-hover:text-gray-500"></i>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <!-- 상품명 정렬 -->
+                        <th class="py-3.5 px-4 cursor-pointer hover:bg-blue-50/70 transition group" onclick="sortBy('name')" title="상품명 기준 정렬">
+                            <div class="flex items-center space-x-1.5">
+                                <span>상품명 / 카테고리</span>
+                                {% if sort_by == 'name' %}
+                                    <i class="fa-solid {% if order == 'asc' %}fa-arrow-up-a-z text-blue-600{% else %}fa-arrow-down-z-a text-blue-600{% endif %}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort text-gray-300 group-hover:text-gray-500"></i>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="py-3.5 px-4 w-44">규격 / 매수</th>
+                        <!-- 가격 정렬 -->
+                        <th class="py-3.5 px-4 w-52 cursor-pointer hover:bg-blue-50/70 transition group" onclick="sortBy('price')" title="가격 기준 정렬">
+                            <div class="flex items-center justify-between pr-4">
+                                <span>가격 수정 (원)</span>
+                                {% if sort_by == 'price' %}
+                                    <i class="fa-solid {% if order == 'asc' %}fa-arrow-up-1-9 text-blue-600{% else %}fa-arrow-down-9-1 text-blue-600{% endif %}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort text-gray-300 group-hover:text-gray-500"></i>
+                                {% endif %}
+                            </div>
+                        </th>
+                        <th class="py-3.5 px-4 w-28 text-center">관리</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-gray-700">
+                    {% if products %}
+                    {% for p in products %}
+                    <tr id="row-{{ p.id }}" class="hover:bg-blue-50/40 transition">
+                        <!-- 개별 체크박스 -->
+                        <td class="py-3.5 px-4 text-center">
+                            <input 
+                                type="checkbox" 
+                                class="product-item-checkbox w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer" 
+                                value="{{ p.id }}"
+                                data-id="{{ p.id }}"
+                                data-code="{{ p.item_code }}"
+                                data-name="{{ p.name }}"
+                                data-price="{{ p.price }}"
+                                onchange="updateSelectedState()"
+                            >
+                        </td>
+                        <td class="py-3.5 px-3 text-center text-gray-400 font-mono">{{ p.id }}</td>
+                        <td class="py-3.5 px-3 text-center">
+                            <div class="w-12 h-14 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 mx-auto flex items-center justify-center">
+                                {% if p.thumbnail_url %}
+                                <img src="{{ p.thumbnail_url }}" alt="{{ p.name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <i class="fa-regular fa-image text-gray-400 text-base"></i>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-bold text-blue-900 font-mono tracking-wide">{{ p.item_code }}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="text-[10px] text-gray-400 block">{{ p.category_name }}</span>
+                            <a href="/products/{{ p.id }}" target="_blank" class="font-bold text-gray-900 hover:text-blue-600 transition">
+                                {{ p.name }}
+                            </a>
+                            <span class="text-[10px] text-gray-400 block mt-0.5">내지 이미지: {{ p.image_count }}장</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-gray-500">
+                            <span class="block truncate">{{ p.dimensions or '-' }}</span>
+                            <span class="block text-[11px] text-gray-400">{{ p.sheets or '-' }}</span>
+                        </td>
+                        <!-- Quick Price Update Form -->
+                        <td class="py-3.5 px-4">
+                            <form action="/admin/products/{{ p.id }}/price" method="post" class="flex items-center space-x-1.5">
+                                <input 
+                                    type="number" 
+                                    name="price" 
+                                    value="{{ p.price }}" 
+                                    class="w-28 px-2.5 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-bold text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-600"
+                                >
+                                <button type="submit" class="px-2.5 py-1.5 bg-gray-800 hover:bg-black text-white text-[11px] font-semibold rounded-lg transition">
+                                    수정
+                                </button>
+                            </form>
+                        </td>
+                        <!-- Actions -->
+                        <td class="py-3.5 px-4 text-center space-x-1 whitespace-nowrap">
+                            <a href="/admin/products/{{ p.id }}/edit" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs transition inline-block">
+                                상세수정
+                            </a>
+                            <form action="/admin/products/{{ p.id }}/delete" method="post" class="inline" onsubmit="return confirm('\'{{ p.name }}\' 상품을 삭제하시겠습니까?');">
+                                <button type="submit" class="p-1.5 text-red-500 hover:text-red-700" title="삭제">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="py-16 text-center text-gray-400">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3 text-lg">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <p class="font-bold text-sm text-gray-600">등록된 상품이 없거나 조건에 맞는 상품이 없습니다.</p>
+                            <p class="text-xs text-gray-400 mt-1">상단의 '새 상품 등록' 또는 '엑셀 일괄 등록'을 통해 상품을 추가해보세요.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==================== 1. 엑셀 일괄 등록 모달 ==================== -->
+<div id="excelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden animate-fade-in p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-6">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-file-excel"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-gray-900">엑셀 상품 일괄 등록</h3>
+                    <p class="text-xs text-gray-500">엑셀 양식에 맞춰 여러 상품을 한 번에 등록하거나 정보를 수정합니다.</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeExcelModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <!-- Guide Notice -->
+        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 text-xs space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-emerald-900 flex items-center">
+                    <i class="fa-solid fa-circle-info mr-1.5 text-emerald-600"></i>작성 가이드 안내
+                </span>
+                <a href="/admin/products/template" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition inline-flex items-center">
+                    <i class="fa-solid fa-download mr-1"></i>표준 양식 다운로드
+                </a>
+            </div>
+            <p class="text-emerald-800 leading-relaxed text-[11px]">
+                1. <strong>[표준 양식 다운로드]</strong> 버튼을 눌러 공식 템플릿(.xlsx)을 내려받으세요.<br>
+                2. 필수 컬럼: <strong>카테고리, 상품코드, 상품명, 단가(원)</strong><br>
+                3. 카테고리는 양식 내 <strong>'카테고리_참조목록'</strong> 시트에 기재된 명칭과 일치해야 합니다.<br>
+                4. 이미 등록된 상품코드와 동일한 코드가 포함된 경우 아래 옵션에 따라 업데이트됩니다.
+            </p>
+        </div>
+
+        <!-- Upload Form -->
+        <form action="/admin/products/upload-excel" method="post" enctype="multipart/form-data" class="space-y-5" onsubmit="return submitExcelUpload(this);">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-2">
+                    업로드할 엑셀/CSV 파일 (.xlsx, .csv)
+                </label>
+                <div class="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-2xl p-6 text-center transition bg-gray-50/50 cursor-pointer relative">
+                    <input 
+                        type="file" 
+                        name="file" 
+                        id="excelFileInput"
+                        accept=".xlsx, .csv" 
+                        required
+                        onchange="handleExcelFileSelect(this)"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                    <div id="uploadPlaceholder" class="space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <p class="text-xs font-bold text-gray-700">이곳을 클릭하거나 파일을 드래그하여 놓으세요</p>
+                        <p class="text-[11px] text-gray-400">지원 형식: .xlsx, .csv (최대 10MB)</p>
+                    </div>
+                    <div id="fileSelectedInfo" class="hidden space-y-1">
+                        <i class="fa-solid fa-file-circle-check text-2xl text-emerald-600"></i>
+                        <p id="selectedFileName" class="text-xs font-bold text-emerald-800 break-all"></p>
+                        <p id="selectedFileSize" class="text-[11px] text-emerald-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option Checkbox -->
+            <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                <label class="flex items-start space-x-2.5 cursor-pointer">
+                    <input type="checkbox" name="update_existing" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 mt-0.5">
+                    <div>
+                        <span class="text-xs font-bold text-gray-800 block">기존 상품코드 일치 시 정보 업데이트 (덮어쓰기)</span>
+                        <span class="text-[11px] text-gray-500 block mt-0.5">체크 해제 시 이미 존재하는 상품코드는 등록을 건너뜁니다.</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeExcelModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">
+                    취소
+                </button>
+                <button type="submit" id="excelSubmitBtn" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center">
+                    <i class="fa-solid fa-upload mr-1.5"></i>일괄 등록 시작
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== 2. 가격 일괄 변경 모달 ==================== -->
+<div id="bulkPriceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden animate-fade-in p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-6">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-gray-900">선택 상품 가격 일괄 변경</h3>
+                    <p class="text-xs text-gray-500">선택된 <strong id="priceModalCount" class="text-blue-600">0</strong>개의 상품 가격을 일괄 조정합니다.</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeBulkPriceModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form id="bulkPriceForm" action="/admin/products/bulk-price" method="post" class="space-y-5" onsubmit="return submitBulkPrice(this);">
+            <input type="hidden" name="product_ids" id="bulkPriceProductIds" value="">
+
+            <!-- Change Mode Options -->
+            <div class="space-y-2.5">
+                <label class="block text-xs font-bold text-gray-700">가격 변경 방식 선택</label>
+                
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                    <input type="radio" name="price_type" value="fixed" checked onchange="updatePriceInputLabel(this)" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="text-xs font-bold text-gray-900 block">지정 금액으로 일괄 설정</span>
+                        <span class="text-[11px] text-gray-400">선택한 모든 상품을 동일한 특정 금액으로 변경합니다.</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                    <input type="radio" name="price_type" value="add" onchange="updatePriceInputLabel(this)" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="text-xs font-bold text-gray-900 block">금액 인상 (+원)</span>
+                        <span class="text-[11px] text-gray-400">현재 각 상품 가격에서 입력한 금액만큼 추가합니다.</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                    <input type="radio" name="price_type" value="subtract" onchange="updatePriceInputLabel(this)" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="text-xs font-bold text-gray-900 block">금액 인하 (-원)</span>
+                        <span class="text-[11px] text-gray-400">현재 각 상품 가격에서 입력한 금액만큼 차감합니다.</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                    <input type="radio" name="price_type" value="percent_add" onchange="updatePriceInputLabel(this)" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="text-xs font-bold text-gray-900 block">비율 인상 (+%)</span>
+                        <span class="text-[11px] text-gray-400">현재 각 상품 가격에서 N% 인상 (10원 단위 반올림).</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+                    <input type="radio" name="price_type" value="percent_sub" onchange="updatePriceInputLabel(this)" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="text-xs font-bold text-gray-900 block">비율 인하 (-%)</span>
+                        <span class="text-[11px] text-gray-400">현재 각 상품 가격에서 N% 인하 (10원 단위 반올림).</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Value Input -->
+            <div>
+                <label id="priceValueLabel" class="block text-xs font-bold text-gray-700 mb-1.5">
+                    설정할 가격 (원)
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        name="price_value" 
+                        id="priceValueInput"
+                        required 
+                        min="0"
+                        placeholder="예: 5000" 
+                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                    >
+                    <span id="priceUnitText" class="absolute right-3.5 top-2.5 text-xs text-gray-500 font-bold">원</span>
+                </div>
+            </div>
+
+            <!-- Live Sample Preview -->
+            <div id="pricePreviewBox" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 text-xs space-y-1.5">
+                <span class="font-bold text-gray-700 block text-[11px]">미리보기 (선택 항목 중 상위 최대 3개):</span>
+                <div id="pricePreviewList" class="space-y-1 text-gray-600 font-mono text-[11px]">
+                    <!-- JS populated -->
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeBulkPriceModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">
+                    취소
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition">
+                    가격 일괄 변경 실행
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== 3. 카테고리 일괄 이동 모달 ==================== -->
+<div id="bulkCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden animate-fade-in p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-6">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-folder-tree"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-gray-900">카테고리 일괄 이동</h3>
+                    <p class="text-xs text-gray-500">선택된 <strong id="categoryModalCount" class="text-indigo-600">0</strong>개의 상품을 다른 카테고리로 이동합니다.</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeBulkCategoryModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form action="/admin/products/bulk-category" method="post" class="space-y-5" onsubmit="return submitBulkCategory(this);">
+            <input type="hidden" name="product_ids" id="bulkCategoryProductIds" value="">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-2">이동할 대상 카테고리</label>
+                <select name="target_category_id" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:bg-white">
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }} (ID: {{ cat.id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeBulkCategoryModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">
+                    취소
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition">
+                    카테고리 일괄 이동 실행
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== Hidden Bulk Delete Form ==================== -->
+<form id="bulkDeleteForm" action="/admin/products/bulk-delete" method="post" class="hidden">
+    <input type="hidden" name="product_ids" id="bulkDeleteProductIds" value="">
+</form>
+
+<!-- Client-side Interactive Logic -->
+<script>
+    // ---------- 1. Checkbox & Selection Management ----------
+    function getSelectedCheckboxes() {
+        return Array.from(document.querySelectorAll('.product-item-checkbox:checked'));
+    }
+
+    function updateSelectedState() {
+        const selected = getSelectedCheckboxes();
+        const count = selected.length;
+        const total = document.querySelectorAll('.product-item-checkbox').length;
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const bulkActionBar = document.getElementById('bulkActionBar');
+
+        // Master checkbox state
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = (count === total && total > 0);
+            selectAllCheckbox.indeterminate = (count > 0 && count < total);
+        }
+
+        // Highlight selected rows
+        document.querySelectorAll('.product-item-checkbox').forEach(cb => {
+            const tr = document.getElementById(`row-${cb.value}`);
+            if (tr) {
+                if (cb.checked) {
+                    tr.classList.add('bg-blue-50/70');
+                } else {
+                    tr.classList.remove('bg-blue-50/70');
+                }
+            }
+        });
+
+        // Show / Hide floating action bar
+        if (count > 0) {
+            bulkActionBar.classList.remove('hidden');
+            document.getElementById('selectedBadge').innerText = count;
+            document.getElementById('selectedCountText').innerText = count;
+        } else {
+            bulkActionBar.classList.add('hidden');
+        }
+
+        updatePricePreview();
+    }
+
+    function toggleSelectAll(masterCheckbox) {
+        const isChecked = masterCheckbox.checked;
+        document.querySelectorAll('.product-item-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateSelectedState();
+    }
+
+    function deselectAll() {
+        document.querySelectorAll('.product-item-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelectedState();
+    }
+
+    // ---------- 2. Bulk Delete ----------
+    function executeBulkDelete() {
+        const selected = getSelectedCheckboxes();
+        if (selected.length === 0) {
+            alert('삭제할 상품을 먼저 선택해주세요.');
+            return;
+        }
+
+        const count = selected.length;
+        const sampleNames = selected.slice(0, 3).map(cb => cb.dataset.name).join(', ');
+        const moreText = count > 3 ? ` 외 ${count - 3}개` : '';
+
+        const msg = `선택하신 ${count}개의 상품을 정말로 삭제(비활성화)하시겠습니까?\n\n[선택 목록]: ${sampleNames}${moreText}\n\n* 삭제 후 필요시 관리자 문의를 통해 복구할 수 있습니다.`;
+        if (confirm(msg)) {
+            const ids = selected.map(cb => cb.value).join(',');
+            document.getElementById('bulkDeleteProductIds').value = ids;
+            document.getElementById('bulkDeleteForm').submit();
+        }
+    }
+
+    // ---------- 3. Excel Upload Modal ----------
+    function openExcelModal() {
+        document.getElementById('excelModal').classList.remove('hidden');
+    }
+
+    function closeExcelModal() {
+        document.getElementById('excelModal').classList.add('hidden');
+    }
+
+    function handleExcelFileSelect(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+            document.getElementById('fileSelectedInfo').classList.remove('hidden');
+            document.getElementById('selectedFileName').innerText = file.name;
+            document.getElementById('selectedFileSize').innerText = `크기: ${(file.size / 1024).toFixed(1)} KB`;
+        }
+    }
+
+    function submitExcelUpload(form) {
+        const btn = document.getElementById('excelSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>업로드 및 처리 중...';
+        return true;
+    }
+
+    // ---------- 4. Bulk Price Modal ----------
+    function openBulkPriceModal() {
+        const selected = getSelectedCheckboxes();
+        if (selected.length === 0) {
+            alert('가격을 변경할 상품을 선택해주세요.');
+            return;
+        }
+        document.getElementById('priceModalCount').innerText = selected.length;
+        document.getElementById('bulkPriceProductIds').value = selected.map(cb => cb.value).join(',');
+        document.getElementById('bulkPriceModal').classList.remove('hidden');
+        updatePricePreview();
+    }
+
+    function closeBulkPriceModal() {
+        document.getElementById('bulkPriceModal').classList.add('hidden');
+    }
+
+    function updatePriceInputLabel(radio) {
+        const label = document.getElementById('priceValueLabel');
+        const unit = document.getElementById('priceUnitText');
+        const input = document.getElementById('priceValueInput');
+
+        if (radio.value === 'fixed') {
+            label.innerText = '설정할 단가 (원)';
+            unit.innerText = '원';
+            input.placeholder = '예: 5000';
+        } else if (radio.value === 'add') {
+            label.innerText = '인상할 금액 (+원)';
+            unit.innerText = '원';
+            input.placeholder = '예: 500';
+        } else if (radio.value === 'subtract') {
+            label.innerText = '인하할 금액 (-원)';
+            unit.innerText = '원';
+            input.placeholder = '예: 300';
+        } else if (radio.value === 'percent_add') {
+            label.innerText = '인상 비율 (+%)';
+            unit.innerText = '%';
+            input.placeholder = '예: 10';
+        } else if (radio.value === 'percent_sub') {
+            label.innerText = '인하 비율 (-%)';
+            unit.innerText = '%';
+            input.placeholder = '예: 5';
+        }
+        updatePricePreview();
+    }
+
+    function updatePricePreview() {
+        const previewList = document.getElementById('pricePreviewList');
+        if (!previewList) return;
+
+        const selected = getSelectedCheckboxes().slice(0, 3);
+        if (selected.length === 0) {
+            previewList.innerHTML = '<div class="text-gray-400">선택된 상품이 없습니다.</div>';
+            return;
+        }
+
+        const mode = (document.querySelector('input[name="price_type"]:checked') || {}).value || 'fixed';
+        const val = parseFloat(document.getElementById('priceValueInput')?.value) || 0;
+
+        let html = '';
+        selected.forEach(cb => {
+            const curPrice = parseInt(cb.dataset.price) || 0;
+            let nextPrice = curPrice;
+
+            if (mode === 'fixed') {
+                nextPrice = val;
+            } else if (mode === 'add') {
+                nextPrice = Math.max(0, curPrice + val);
+            } else if (mode === 'subtract') {
+                nextPrice = Math.max(0, curPrice - val);
+            } else if (mode === 'percent_add') {
+                nextPrice = Math.round((curPrice * (1.0 + val / 100.0)) / 10) * 10;
+            } else if (mode === 'percent_sub') {
+                nextPrice = Math.max(0, Math.round((curPrice * (1.0 - val / 100.0)) / 10) * 10);
+            }
+
+            html += `<div class="flex items-center justify-between border-b border-gray-100 pb-1">
+                <span class="truncate max-w-[200px]">[${cb.dataset.code}] ${cb.dataset.name}</span>
+                <span class="font-bold text-gray-800">${curPrice.toLocaleString()}원 ➔ <span class="text-blue-600">${nextPrice.toLocaleString()}원</span></span>
+            </div>`;
+        });
+
+        previewList.innerHTML = html;
+    }
+
+    document.getElementById('priceValueInput')?.addEventListener('input', updatePricePreview);
+
+    function submitBulkPrice(form) {
+        const val = document.getElementById('priceValueInput').value;
+        if (!val || parseFloat(val) < 0) {
+            alert('유효한 금액 또는 비율을 입력해주세요.');
+            return false;
+        }
+        return confirm('선택한 상품들의 가격을 일괄 변경하시겠습니까?');
+    }
+
+    // ---------- 5. Bulk Category Modal ----------
+    function openBulkCategoryModal() {
+        const selected = getSelectedCheckboxes();
+        if (selected.length === 0) {
+            alert('카테고리를 이동할 상품을 선택해주세요.');
+            return;
+        }
+        document.getElementById('categoryModalCount').innerText = selected.length;
+        document.getElementById('bulkCategoryProductIds').value = selected.map(cb => cb.value).join(',');
+        document.getElementById('bulkCategoryModal').classList.remove('hidden');
+    }
+
+    function closeBulkCategoryModal() {
+        document.getElementById('bulkCategoryModal').classList.add('hidden');
+    }
+
+    function submitBulkCategory(form) {
+        return confirm('선택한 상품들의 카테고리를 일괄 이동하시겠습니까?');
+    }
+
+    // ---------- 6. Grid Sorting ----------
+    function sortBy(column) {
+        const url = new URL(window.location.href);
+        const curSort = url.searchParams.get('sort_by') || 'id';
+        const curOrder = url.searchParams.get('order') || 'asc';
+        let nextOrder = 'asc';
+        if (curSort === column) {
+            nextOrder = (curOrder === 'asc') ? 'desc' : 'asc';
+        } else if (column === 'price') {
+            nextOrder = 'desc';
+        }
+        url.searchParams.set('sort_by', column);
+        url.searchParams.set('order', nextOrder);
+        window.location.href = url.toString();
+    }
+
+    function applySorting(val) {
+        const parts = val.split('_');
+        const sort_by = parts[0];
+        const order = parts[1];
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort_by', sort_by);
+        url.searchParams.set('order', order);
+        window.location.href = url.toString();
+    }
+
+    // Close modals on Escape key
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeExcelModal();
+            closeBulkPriceModal();
+            closeBulkCategoryModal();
+        }
+    });
+</script>
+{% endblock %}
