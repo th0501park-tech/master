@@ -2,14 +2,12 @@ from typing import Optional, List
 from urllib.parse import quote
 from fastapi import APIRouter, Request, Form, Query, HTTPException, Depends, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from fastapi.templating import Jinja2Templates
-
 from app.core.config import settings
+from app.core.templates import templates
 from app.db import queries
 from app.services import excel_service
 
 router = APIRouter(prefix="/admin")
-templates = Jinja2Templates(directory=str(settings.TEMPLATES_DIR))
 
 def get_current_admin(request: Request) -> Optional[dict]:
     """세션에서 현재 로그인된 관리자 확인"""

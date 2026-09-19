@@ -1,13 +1,11 @@
 from typing import Optional
 from fastapi import APIRouter, Request, Form, Query, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-
 from app.core.config import settings
+from app.core.templates import templates
 from app.db import queries
 
 router = APIRouter()
-templates = Jinja2Templates(directory=str(settings.TEMPLATES_DIR))
 
 def common_context(request: Request, extra: dict = None) -> dict:
     """모든 템플릿에 공통으로 전달되는 컨텍스트 (카테고리 목록, 회사 정보 등)"""

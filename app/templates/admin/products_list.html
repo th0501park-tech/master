@@ -293,7 +293,7 @@
                         <td class="py-3.5 px-3 text-center">
                             <div class="w-12 h-14 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 mx-auto flex items-center justify-center">
                                 {% if p.thumbnail_url %}
-                                <img src="{{ p.thumbnail_url }}" alt="{{ p.name }}" class="w-full h-full object-cover">
+                                <img src="{{ p.thumbnail_url | safe_image }}" alt="{{ p.name }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
                                 {% else %}
                                 <i class="fa-regular fa-image text-gray-400 text-base"></i>
                                 {% endif %}

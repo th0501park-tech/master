@@ -22,16 +22,17 @@
                 <div class="relative w-full aspect-[4/5] bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-inner flex items-center justify-center group">
                     <img 
                         id="mainProductImage" 
-                        src="{{ product.thumbnail_url or (product.images[0].image_url if product.images else '') }}" 
+                        src="{{ (product.thumbnail_url or (product.images[0].image_url if product.images else '')) | safe_image }}" 
                         alt="{{ product.name }}"
                         class="w-full h-full object-contain transition duration-200"
+                        onerror="this.onerror=null; this.src='/static/images/no-image.svg';"
                     >
                     <span id="currentImageLabel" class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">
                         표지 미리보기
                     </span>
                     <a 
                         id="zoomImageLink" 
-                        href="{{ product.thumbnail_url or (product.images[0].image_url if product.images else '#') }}" 
+                        href="{{ (product.thumbnail_url or (product.images[0].image_url if product.images else '#')) | safe_image }}" 
                         target="_blank"
                         class="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-lg shadow text-xs font-semibold flex items-center space-x-1.5 transition"
                     >
@@ -52,10 +53,10 @@
                         {% for img in product.images %}
                         <button 
                             type="button"
-                            onclick="switchMonthImage('{{ img.image_url }}', '{{ img.title }}', this)"
+                            onclick="switchMonthImage('{{ img.image_url | safe_image }}', '{{ img.title }}', this)"
                             class="month-thumb-btn flex-shrink-0 w-16 h-20 rounded-lg border-2 overflow-hidden bg-gray-50 focus:outline-none transition relative {% if loop.first %}border-blue-600 ring-2 ring-blue-200{% else %}border-gray-200 hover:border-gray-400{% endif %}"
                         >
-                            <img src="{{ img.image_url }}" alt="{{ img.title }}" class="w-full h-full object-cover">
+                            <img src="{{ img.image_url | safe_image }}" alt="{{ img.title }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
                             <span class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center font-bold py-0.5">
                                 {{ img.title }}
                             </span>
@@ -181,8 +182,8 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {% for img in product.images %}
             <div class="border rounded-xl p-2 bg-gray-50 flex flex-col items-center">
-                <a href="{{ img.image_url }}" target="_blank" class="block aspect-[3/4] w-full overflow-hidden rounded-lg bg-white">
-                    <img src="{{ img.image_url }}" alt="{{ img.title }}" class="w-full h-full object-cover hover:scale-105 transition" loading="lazy">
+                <a href="{{ img.image_url | safe_image }}" target="_blank" class="block aspect-[3/4] w-full overflow-hidden rounded-lg bg-white">
+                    <img src="{{ img.image_url | safe_image }}" alt="{{ img.title }}" class="w-full h-full object-cover hover:scale-105 transition" loading="lazy" onerror="this.onerror=null; this.src='/static/images/no-image.svg';">
                 </a>
                 <span class="mt-2 text-xs font-bold text-gray-700">{{ img.title }}</span>
             </div>

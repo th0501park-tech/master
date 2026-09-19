@@ -51,10 +51,11 @@
             <a href="/products/{{ prod.id }}" class="block relative aspect-[4/5] bg-gray-100 overflow-hidden">
                 {% if prod.thumbnail_url %}
                 <img 
-                    src="{{ prod.thumbnail_url }}" 
+                    src="{{ prod.thumbnail_url | safe_image }}" 
                     alt="{{ prod.name }}" 
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     loading="lazy"
+                    onerror="this.onerror=null; this.src='/static/images/no-image.svg';"
                 >
                 {% else %}
                 <div class="w-full h-full flex items-center justify-center text-gray-400">

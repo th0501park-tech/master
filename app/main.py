@@ -2,10 +2,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
+from app.core.templates import templates
 from app.db.connection import init_db_pool, close_db_pool
 from app.db.queries import seed_sample_notices
 from app.routes import pages_router, api_router, admin_router
@@ -37,9 +37,6 @@ app.add_middleware(
 
 # Static files mount
 app.mount("/static", StaticFiles(directory=str(settings.STATIC_DIR)), name="static")
-
-# Templates for error handling
-templates = Jinja2Templates(directory=str(settings.TEMPLATES_DIR))
 
 # Register Routers
 app.include_router(pages_router)
