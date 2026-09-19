@@ -1,30 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
 
     <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 text-xs text-gray-500 mb-6">
+    <nav class="flex items-center space-x-1.5 sm:space-x-2 text-xs text-gray-500 mb-4 sm:mb-6">
         <a href="/" class="hover:text-blue-600">홈</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
         <span class="text-gray-900 font-semibold">자주 묻는 질문(FAQ)</span>
     </nav>
 
     <!-- Header -->
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
         <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Frequently Asked Questions</span>
-        <h1 class="text-2xl sm:text-3xl font-black text-gray-900 mt-1">자주 묻는 질문 (FAQ)</h1>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 mt-1">자주 묻는 질문 (FAQ)</h1>
         <p class="text-xs text-gray-500 mt-1">
             캘린더 주문 제작, 상호 인쇄, 견적 및 배송 관련하여 고객님들께서 가장 많이 문의하시는 질문들을 정리했습니다.
         </p>
     </div>
 
     <!-- Category Filter Tabs -->
-    <div class="flex items-center space-x-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+    <div class="flex items-center space-x-2 overflow-x-auto pb-3 mb-6 scrollbar-none -mx-3 px-3 sm:mx-0 sm:px-0">
         {% for cat in faq_categories %}
         <a 
             href="?category={{ cat }}"
-            class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition {% if selected_category == cat %}bg-blue-600 text-white shadow-md{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}"
+            class="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition {% if selected_category == cat %}bg-blue-600 text-white shadow-md{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}"
         >
             {{ cat }}
         </a>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- FAQ Accordion List -->
-    <div class="space-y-3 mb-12">
+    <div class="space-y-3 mb-8 sm:mb-12">
         {% if faqs %}
         {% for faq in faqs %}
         <div class="faq-item bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm transition">
@@ -40,28 +40,28 @@
             <button 
                 type="button"
                 onclick="toggleFaq(this)"
-                class="w-full text-left p-5 flex items-center justify-between space-x-4 focus:outline-none hover:bg-gray-50/80 transition"
+                class="w-full text-left p-4 sm:p-5 flex items-center justify-between space-x-3 sm:space-x-4 focus:outline-none hover:bg-gray-50/80 transition"
             >
-                <div class="flex items-start space-x-3">
-                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div class="flex items-start space-x-2.5 sm:space-x-3 min-w-0">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
                         Q
                     </span>
-                    <div>
-                        <span class="text-[11px] font-semibold text-blue-600 mb-0.5 block">[{{ faq.category }}]</span>
-                        <h3 class="text-sm sm:text-base font-bold text-gray-900 leading-snug">
+                    <div class="min-w-0">
+                        <span class="text-[10px] sm:text-[11px] font-semibold text-blue-600 mb-0.5 block">[{{ faq.category }}]</span>
+                        <h3 class="text-xs sm:text-base font-bold text-gray-900 leading-snug">
                             {{ faq.question }}
                         </h3>
                     </div>
                 </div>
-                <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-shrink-0 faq-icon transition duration-200">
+                <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shrink-0 faq-icon transition duration-200">
                     <i class="fa-solid fa-chevron-down text-xs"></i>
                 </div>
             </button>
 
             <!-- Answer Content (Initially hidden) -->
-            <div class="faq-answer hidden px-5 pb-6 pt-2 bg-blue-50/30 border-t border-gray-100">
-                <div class="flex items-start space-x-3 text-xs sm:text-sm text-gray-700 leading-relaxed pl-9">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-black text-xs flex items-center justify-center flex-shrink-0 -ml-9 mr-3">
+            <div class="faq-answer hidden px-4 sm:px-5 pb-5 sm:pb-6 pt-2 bg-blue-50/30 border-t border-gray-100">
+                <div class="flex items-start space-x-2.5 sm:space-x-3 text-xs sm:text-sm text-gray-700 leading-relaxed pl-7 sm:pl-9">
+                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-black text-xs flex items-center justify-center shrink-0 -ml-7 sm:-ml-9 mr-2 sm:mr-3">
                         A
                     </span>
                     <div class="flex-1 whitespace-pre-line">
@@ -72,23 +72,23 @@
         </div>
         {% endfor %}
         {% else %}
-        <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+        <div class="bg-white rounded-2xl p-8 sm:p-12 text-center border border-gray-200">
             <p class="text-xs text-gray-400">해당 분류에 등록된 질문이 없습니다.</p>
         </div>
         {% endif %}
     </div>
 
     <!-- Help Banner -->
-    <div class="bg-gradient-to-r from-slate-900 to-blue-950 rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+    <div class="bg-gradient-to-r from-slate-900 to-blue-950 rounded-2xl p-5 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 shadow-lg">
         <div>
-            <h3 class="text-lg font-bold">궁금하신 점이 해결되지 않으셨나요?</h3>
-            <p class="text-xs text-slate-300 mt-1">1:1 질문과 답변 게시판에 글을 남겨주시거나 고객센터로 전화 주시면 신속하게 답변해 드립니다.</p>
+            <h3 class="text-base sm:text-lg font-bold">궁금하신 점이 해결되지 않으셨나요?</h3>
+            <p class="text-xs text-slate-300 mt-1">1:1 질문과 답변 게시판에 글을 남겨주시거나 고객센터로 전화 주시면 신속하게 안내해 드립니다.</p>
         </div>
-        <div class="flex items-center space-x-3">
-            <a href="/board/qna/new" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
+        <div class="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto shrink-0">
+            <a href="/board/qna/new" class="flex-1 sm:flex-initial text-center px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
                 <i class="fa-solid fa-pen mr-1.5"></i>1:1 질문하기
             </a>
-            <a href="tel:{{ settings.TEL }}" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition">
+            <a href="tel:{{ settings.TEL }}" class="flex-1 sm:flex-initial text-center px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition">
                 <i class="fa-solid fa-phone mr-1.5 text-amber-400"></i>{{ settings.TEL }}
             </a>
         </div>

@@ -1,43 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
 
     <!-- Hero Banner Section -->
-    <div class="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl shadow-xl overflow-hidden mb-8 text-white">
+    <div class="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl shadow-xl overflow-hidden mb-6 sm:mb-8 text-white">
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="relative z-10 px-8 py-12 md:py-16 max-w-2xl">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-4">
+        <div class="relative z-10 px-5 py-8 sm:px-8 sm:py-12 md:py-16 max-w-2xl">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3 sm:mb-4">
                 <i class="fa-solid fa-sparkles mr-1.5 text-amber-400"></i>2026 ~ 2027년도 신제품 카탈로그 배부 중
             </span>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight mb-4">
+            <h1 class="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-snug sm:leading-tight mb-3 sm:mb-4">
                 브랜드의 품격을 높이는<br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-400">맞춤 인쇄 카렌다</span>
             </h1>
-            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            <p class="text-slate-300 text-xs sm:text-base leading-relaxed mb-5 sm:mb-6">
                 벽걸이, 탁상용, 숫자판, 일력 등 국내 최고 품질의 지질과 선명한 옵셋 인쇄로 기업/단체의 가치를 전달합니다.
             </p>
-            <div class="flex flex-wrap gap-3">
-                <a href="/quotes/new" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-xl transition flex items-center">
+            <div class="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+                <a href="/quotes/new" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg hover:shadow-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-calculator mr-2"></i>온라인 견적문의 바로가기
                 </a>
-                <a href="/category/large-calendar" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-sm backdrop-blur-sm transition">
+                <a href="/category/large-calendar" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-xs sm:text-sm backdrop-blur-sm transition text-center justify-center flex items-center">
                     카렌다 상품 둘러보기
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Main 2-Column Grid (Sidebar + Main Content) -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Category Fast Pill Bar (Mobile/Tablet Friendly) -->
+    <div class="flex lg:hidden overflow-x-auto space-x-2 pb-3 mb-4 scrollbar-none -mx-3 px-3 sm:mx-0 sm:px-0">
+        {% for cat in categories %}
+        <a href="/category/{{ cat.slug }}" class="shrink-0 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 shadow-sm active:bg-blue-100 transition">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
 
-        <!-- Left Sidebar: Category & Quick Info -->
+    <!-- Main 2-Column Grid (Sidebar + Main Content) -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
+
+        <!-- Left Sidebar (Desktop Only): Category & Quick Info -->
         <aside class="hidden lg:block lg:col-span-1 space-y-6">
             <!-- Category Box -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-blue-900 text-white px-4 py-3 font-bold text-sm flex items-center justify-between">
                     <span><i class="fa-solid fa-layer-group mr-2"></i>제품 카테고리</span>
-                    <span class="text-xs text-blue-200">14개 분류</span>
+                    <span class="text-xs text-blue-200">{{ categories|length }}개 분류</span>
                 </div>
                 <div class="divide-y divide-gray-100">
                     {% for cat in categories %}
@@ -61,7 +70,7 @@
                     <!-- Original Banner Image with Link -->
                     <div class="text-center">
                         <a href="{{ settings.WEBHARD_URL }}" target="_blank" rel="noopener noreferrer" class="inline-block hover:opacity-90 transition group" title="웹하드 바로가기 (새창)">
-                            <img src="/static/images/WEBHARD.jpg" alt="웹하드 Webhard.co.kr" class="mx-auto rounded border border-gray-100 shadow-sm group-hover:border-blue-400 transition">
+                            <img src="/static/images/WEBHARD.jpg" alt="웹하드 Webhard.co.kr" class="mx-auto rounded border border-gray-100 shadow-sm group-hover:border-blue-400 transition max-w-full">
                         </a>
                     </div>
 
@@ -93,7 +102,7 @@
                     <!-- Email Banner & Link -->
                     <div class="pt-2 border-t border-gray-100 text-center">
                         <a href="mailto:{{ settings.EMAIL_SECONDARY }}" class="inline-block hover:opacity-90 transition group" title="이메일 접수하기">
-                            <img src="/static/images/EMAIL.jpg" alt="이메일 happy4431@hanmail.net" class="mx-auto rounded border border-gray-100 shadow-sm group-hover:border-emerald-400 transition">
+                            <img src="/static/images/EMAIL.jpg" alt="이메일 happy4431@hanmail.net" class="mx-auto rounded border border-gray-100 shadow-sm group-hover:border-emerald-400 transition max-w-full">
                         </a>
                         <p class="text-[10px] text-gray-400 mt-1">
                             이메일로도 인쇄 시안 파일 접수가 가능합니다.
@@ -108,44 +117,37 @@
                     <i class="fa-solid fa-headset text-lg"></i>
                     <span>고객상담 및 견적안내</span>
                 </div>
-                <div class="text-2xl font-black text-amber-600 mb-2">{{ settings.TEL }}</div>
+                <div class="text-2xl font-black text-amber-600 mb-2">
+                    <a href="tel:{{ settings.TEL }}">{{ settings.TEL }}</a>
+                </div>
                 <p class="text-xs text-gray-600 leading-relaxed mb-3">
                     주문 수량에 따른 대량 할인 및 상호 인쇄 시안 문의를 친절하게 상담해 드립니다.
                 </p>
-                <a href="/quotes/new" class="block w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-center text-xs rounded-lg transition shadow-sm">
+                <a href="/quotes/new" class="block w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-center text-xs rounded-lg transition shadow-sm">
                     상호인쇄 견적 접수
                 </a>
             </div>
         </aside>
 
         <!-- Right Main: Featured Products & Notice -->
-        <section class="lg:col-span-3 space-y-8">
-
-            <!-- Category Fast Pill Bar (Mobile/Tablet Friendly) -->
-            <div class="flex lg:hidden overflow-x-auto space-x-2 pb-2 scrollbar-none">
-                {% for cat in categories %}
-                <a href="/category/{{ cat.slug }}" class="whitespace-nowrap px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                    {{ cat.name }}
-                </a>
-                {% endfor %}
-            </div>
+        <section class="lg:col-span-3 space-y-6 sm:space-y-8">
 
             <!-- Featured Products Header -->
             <div>
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
                             <i class="fa-solid fa-fire text-amber-500 mr-2"></i>추천 및 인기 카렌다
                         </h2>
-                        <p class="text-xs text-gray-500 mt-0.5">기업 및 단체에서 가장 많이 찾는 대표 캘린더 라인업입니다.</p>
+                        <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5">기업 및 단체에서 가장 많이 찾는 대표 캘린더 라인업입니다.</p>
                     </div>
-                    <a href="/category/large-calendar" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center">
+                    <a href="/category/large-calendar" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center shrink-0">
                         전체보기 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
                     </a>
                 </div>
 
-                <!-- Product Card Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                <!-- Product Card Grid (2-columns on mobile, up to 4 on desktop) -->
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
                     {% for prod in featured_products %}
                     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition duration-200 flex flex-col group">
                         <!-- Thumbnail Image -->
@@ -163,35 +165,35 @@
                                 <i class="fa-regular fa-image text-3xl"></i>
                             </div>
                             {% endif %}
-                            <span class="absolute top-2.5 left-2.5 bg-blue-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
+                            <span class="absolute top-2 left-2 bg-blue-900/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded shadow">
                                 {{ prod.item_code }}
                             </span>
                         </a>
 
                         <!-- Product Info -->
-                        <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div class="p-2.5 sm:p-4 flex-1 flex flex-col justify-between">
                             <div>
-                                <span class="text-[11px] text-blue-600 font-semibold">{{ prod.category_name }}</span>
-                                <h3 class="font-bold text-gray-900 text-sm mt-0.5 line-clamp-1 group-hover:text-blue-600 transition">
+                                <span class="text-[10px] sm:text-[11px] text-blue-600 font-semibold truncate block">{{ prod.category_name }}</span>
+                                <h3 class="font-bold text-gray-900 text-xs sm:text-sm mt-0.5 line-clamp-2 sm:line-clamp-1 group-hover:text-blue-600 transition leading-snug">
                                     <a href="/products/{{ prod.id }}">{{ prod.name }}</a>
                                 </h3>
                                 
                                 <!-- Spec Mini Tags -->
-                                <div class="mt-2 space-y-1 text-[11px] text-gray-500">
+                                <div class="mt-1.5 sm:mt-2 space-y-0.5 text-[10px] sm:text-[11px] text-gray-500">
                                     {% if prod.dimensions %}
                                     <p class="truncate"><i class="fa-solid fa-ruler-combined text-gray-400 mr-1 w-3"></i>{{ prod.dimensions }}</p>
                                     {% endif %}
                                     {% if prod.sheets %}
-                                    <p><i class="fa-regular fa-file-lines text-gray-400 mr-1 w-3"></i>{{ prod.sheets }}</p>
+                                    <p class="hidden xs:block truncate"><i class="fa-regular fa-file-lines text-gray-400 mr-1 w-3"></i>{{ prod.sheets }}</p>
                                     {% endif %}
                                 </div>
                             </div>
 
                             <!-- Price & CTA -->
-                            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <div class="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
                                 <div>
-                                    <span class="text-[10px] text-gray-400 block">정가</span>
-                                    <span class="text-base font-extrabold text-gray-900">
+                                    <span class="text-[9px] sm:text-[10px] text-gray-400 block leading-none">정가</span>
+                                    <span class="text-xs sm:text-base font-extrabold text-gray-900 mt-0.5 block">
                                         {% if prod.price and prod.price > 0 %}
                                         {{ "{:,}".format(prod.price) }}원
                                         {% else %}
@@ -199,7 +201,7 @@
                                         {% endif %}
                                     </span>
                                 </div>
-                                <a href="/products/{{ prod.id }}" class="px-2.5 py-1.5 bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 rounded-lg text-xs font-semibold transition">
+                                <a href="/products/{{ prod.id }}" class="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 rounded-lg text-[10px] sm:text-xs font-semibold transition shrink-0">
                                     상세보기
                                 </a>
                             </div>
@@ -209,34 +211,60 @@
                 </div>
             </div>
 
+            <!-- Mobile Webhard & Quick Inquiry Banner (Mobile/Tablet Only) -->
+            <div class="block lg:hidden bg-gradient-to-br from-slate-900 to-blue-950 rounded-2xl p-4 sm:p-5 text-white shadow-md">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-bold text-sm text-cyan-300 flex items-center">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2 text-cyan-400"></i>웹하드 시안 파일 접수
+                    </span>
+                    <a href="{{ settings.WEBHARD_URL }}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black text-[11px] rounded-lg transition">
+                        웹하드 바로가기 ↗
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-white/10 p-2.5 rounded-xl backdrop-blur-sm mb-3">
+                    <div class="flex justify-between items-center pr-2 border-r border-white/20">
+                        <span class="text-slate-300">ID: <strong class="text-white">{{ settings.WEBHARD_ID }}</strong></span>
+                        <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_ID }}', '웹하드 아이디가 복사되었습니다.')" class="text-[10px] bg-white/20 hover:bg-white/30 text-white px-1.5 py-0.5 rounded font-sans">복사</button>
+                    </div>
+                    <div class="flex justify-between items-center pl-2">
+                        <span class="text-slate-300">PW: <strong class="text-white">{{ settings.WEBHARD_PW }}</strong></span>
+                        <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_PW }}', '웹하드 비밀번호가 복사되었습니다.')" class="text-[10px] bg-white/20 hover:bg-white/30 text-white px-1.5 py-0.5 rounded font-sans">복사</button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-300 pt-1">
+                    <span><i class="fa-solid fa-phone text-amber-400 mr-1.5"></i>전화상담: <a href="tel:{{ settings.TEL }}" class="font-bold text-amber-300">{{ settings.TEL }}</a></span>
+                    <a href="/quotes/new" class="text-amber-400 font-bold hover:underline">견적신청 바로가기 →</a>
+                </div>
+            </div>
+
             <!-- Bottom Section: Notice & B2B Printing Guide -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pt-2 sm:pt-4">
 
                 <!-- Notices -->
-                <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-bold text-sm text-gray-900 flex items-center">
                             <i class="fa-solid fa-bullhorn text-blue-600 mr-2"></i>공지사항
                         </h3>
-                        <a href="/quotes" class="text-xs text-gray-400 hover:text-gray-600">더보기</a>
+                        <a href="/board/notice" class="text-xs text-gray-400 hover:text-gray-600">더보기</a>
                     </div>
                     <ul class="divide-y divide-gray-100 text-xs">
                         {% for notice in notices %}
-                        <li class="py-2.5 flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                        <li class="py-2.5 flex items-center justify-between hover:text-blue-600 cursor-pointer" onclick="location.href='/board/notice/{{ notice.id }}'">
                             <span class="truncate pr-2">
                                 {% if notice.is_pinned %}
                                 <span class="text-red-500 font-bold mr-1">[공지]</span>
                                 {% endif %}
                                 {{ notice.title }}
                             </span>
-                            <span class="text-gray-400 text-[11px] whitespace-nowrap">{{ notice.created_at.strftime('%m-%d') }}</span>
+                            <span class="text-gray-400 text-[11px] shrink-0">{{ notice.created_at.strftime('%m-%d') }}</span>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
 
                 <!-- B2B Printing Banner -->
-                <div class="bg-slate-800 rounded-xl p-5 text-white shadow-sm flex flex-col justify-between">
+                <div class="bg-slate-800 rounded-xl p-4 sm:p-5 text-white shadow-sm flex flex-col justify-between">
                     <div>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-amber-400">Custom Printing</span>
                         <h3 class="text-base font-bold mt-1 mb-2">기업 상호 / 로고 금박·옵셋 인쇄</h3>
@@ -246,7 +274,7 @@
                     </div>
                     <div class="mt-4 pt-4 border-t border-slate-700 flex items-center justify-between">
                         <span class="text-xs text-amber-300 font-semibold">최소 100부부터 주문제작 가능</span>
-                        <a href="/quotes/new" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition">
+                        <a href="/quotes/new" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shrink-0">
                             견적 문의하기
                         </a>
                     </div>

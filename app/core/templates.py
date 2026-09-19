@@ -29,5 +29,7 @@ def safe_image(url: Optional[str]) -> str:
         
     return url_str
 
-# Jinja2 환경에 필터 등록
+# Jinja2 환경에 필터 및 글로벌 변수 등록
 templates.env.filters["safe_image"] = safe_image
+templates.env.globals["settings"] = settings
+

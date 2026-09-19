@@ -3,23 +3,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const closeDrawerBtn = document.getElementById('closeDrawerBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
+    const drawerContent = document.getElementById('drawerContent');
 
-    if (mobileMenuBtn && mobileDrawer) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileDrawer.classList.remove('hidden');
+    window.openDrawer = function() {
+        if (!mobileDrawer) return;
+        mobileDrawer.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+            if (drawerContent) {
+                drawerContent.classList.remove('-translate-x-full');
+            }
         });
-    }
+    };
 
-    if (closeDrawerBtn && mobileDrawer) {
-        closeDrawerBtn.addEventListener('click', () => {
+    window.closeDrawer = function() {
+        if (!mobileDrawer) return;
+        if (drawerContent) {
+            drawerContent.classList.add('-translate-x-full');
+        }
+        document.body.style.overflow = '';
+        setTimeout(() => {
             mobileDrawer.classList.add('hidden');
-        });
-    }
+        }, 300);
+    };
 
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', openDrawer);
+    }
+    if (closeDrawerBtn) {
+        closeDrawerBtn.addEventListener('click', closeDrawer);
+    }
     if (mobileDrawer) {
         mobileDrawer.addEventListener('click', (e) => {
             if (e.target === mobileDrawer) {
-                mobileDrawer.classList.add('hidden');
+                closeDrawer();
+            }
+        });
+    }
+
+    // Mobile Search Toggle
+    const searchToggleBtn = document.getElementById('mobileSearchToggleBtn');
+    const searchCollapse = document.getElementById('mobileSearchCollapse');
+    if (searchToggleBtn && searchCollapse) {
+        searchToggleBtn.addEventListener('click', () => {
+            searchCollapse.classList.toggle('hidden');
+            if (!searchCollapse.classList.contains('hidden')) {
+                const input = searchCollapse.querySelector('input');
+                if (input) input.focus();
             }
         });
     }

@@ -2,13 +2,21 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>{{ title or settings.COMPANY_NAME }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
+                screens: {
+                    'xs': '480px',
+                    'sm': '640px',
+                    'md': '768px',
+                    'lg': '1024px',
+                    'xl': '1280px',
+                    '2xl': '1536px',
+                },
                 extend: {
                     colors: {
                         primary: {
@@ -36,13 +44,17 @@
 
     <!-- Top Utility Bar -->
     <div class="bg-slate-900 text-slate-300 text-xs py-2 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <span><i class="fa-solid fa-phone text-amber-400 mr-1.5"></i>고객센터: <strong>{{ settings.TEL }}</strong></span>
-                <span class="hidden md:inline"><i class="fa-solid fa-fax text-slate-400 mr-1"></i>FAX: {{ settings.FAX }}</span>
-                <span class="hidden lg:inline"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>{{ settings.ADDRESS }}</span>
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-between items-center text-[11px] sm:text-xs">
+            <div class="flex items-center space-x-3 sm:space-x-4 truncate">
+                <a href="tel:{{ settings.TEL }}" class="hover:text-amber-300 transition flex items-center shrink-0" title="고객센터 전화걸기">
+                    <i class="fa-solid fa-phone text-amber-400 mr-1.5"></i>
+                    <span class="hidden xs:inline">고객센터:</span> <strong class="ml-0.5">{{ settings.TEL }}</strong>
+                </a>
+                <span class="hidden md:inline text-slate-400"><i class="fa-solid fa-fax text-slate-500 mr-1"></i>FAX: {{ settings.FAX }}</span>
+                <span class="hidden lg:inline text-slate-400 truncate"><i class="fa-solid fa-location-dot text-slate-500 mr-1"></i>{{ settings.ADDRESS }}</span>
             </div>
-            <div class="flex items-center space-x-2.5 sm:space-x-3.5">
+            <!-- Desktop Utility Menu -->
+            <div class="hidden sm:flex items-center space-x-2.5 sm:space-x-3.5 shrink-0">
                 <a href="/board/notice" class="hover:text-white transition">공지사항</a>
                 <span class="text-slate-700">|</span>
                 <a href="/board/faq" class="hover:text-white transition">FAQ</a>
@@ -66,28 +78,44 @@
                 </a>
                 {% endif %}
             </div>
+            <!-- Mobile Utility Links -->
+            <div class="flex sm:hidden items-center space-x-2.5 shrink-0">
+                <a href="/board/notice" class="text-slate-400 hover:text-white">공지</a>
+                <span class="text-slate-700">|</span>
+                <a href="/board/faq" class="text-slate-400 hover:text-white">FAQ</a>
+                <span class="text-slate-700">|</span>
+                {% if is_admin %}
+                <a href="/admin" class="text-amber-400 font-bold flex items-center">
+                    <i class="fa-solid fa-gauge-high mr-1 text-[10px]"></i>관리자
+                </a>
+                {% else %}
+                <a href="/admin/login" class="text-slate-400 hover:text-amber-300 flex items-center">
+                    <i class="fa-solid fa-lock text-[9px] mr-1"></i>로그인
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Main Header -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
                 <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center space-x-3">
-                        <div class="w-11 h-11 bg-gradient-to-br from-blue-700 to-indigo-900 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md">
+                <div class="flex items-center min-w-0 pr-2">
+                    <a href="/" class="flex items-center space-x-2.5 sm:space-x-3">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-blue-700 to-indigo-900 rounded-xl flex items-center justify-center text-white font-black text-base sm:text-xl shadow-md shrink-0">
                             BS
                         </div>
-                        <div>
-                            <span class="text-2xl font-black tracking-tight text-gray-900">{{ settings.COMPANY_NAME }}</span>
-                            <p class="text-[11px] text-gray-500 font-medium tracking-wide">캘린더·일력·판촉물 맞춤제작 전문</p>
+                        <div class="min-w-0">
+                            <span class="text-lg sm:text-2xl font-black tracking-tight text-gray-900 truncate block">{{ settings.COMPANY_NAME }}</span>
+                            <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium tracking-wide hidden xs:block truncate">캘린더·일력·판촉물 맞춤제작 전문</p>
                         </div>
                     </a>
                 </div>
 
-                <!-- Search Bar -->
-                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                <!-- Desktop Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-md mx-6 lg:mx-8">
                     <form action="/search" method="get" class="w-full relative">
                         <input 
                             type="text" 
@@ -105,19 +133,42 @@
                 </div>
 
                 <!-- Quick Action Buttons -->
-                <div class="flex items-center space-x-3">
-                    <a href="/quotes/new" class="inline-flex items-center px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition">
-                        <i class="fa-solid fa-file-signature mr-2"></i>온라인 견적신청
+                <div class="flex items-center space-x-1 sm:space-x-3 shrink-0">
+                    <!-- Mobile Search Toggle Button -->
+                    <button id="mobileSearchToggleBtn" type="button" class="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition" aria-label="검색창 열기">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+                    <!-- Quotation Button (Desktop & Tablet) -->
+                    <a href="/quotes/new" class="hidden sm:inline-flex items-center px-3.5 sm:px-4 py-2 sm:py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold rounded-lg shadow-sm hover:shadow transition">
+                        <i class="fa-solid fa-file-signature mr-1.5 sm:mr-2"></i>온라인 견적신청
                     </a>
-                    <!-- Mobile Hamburger -->
-                    <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+                    <!-- Mobile Hamburger Button -->
+                    <button id="mobileMenuBtn" type="button" class="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition" aria-label="메뉴 열기">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
+
+            <!-- Mobile Collapsible Search Bar -->
+            <div id="mobileSearchCollapse" class="hidden md:hidden pb-3 pt-1 border-t border-gray-100">
+                <form action="/search" method="get" class="relative">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        placeholder="상품명 또는 상품코드 검색..." 
+                        value="{{ query or '' }}"
+                        class="w-full pl-10 pr-20 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition"
+                        required
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                    <button type="submit" class="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
+                        검색
+                    </button>
+                </form>
+            </div>
         </div>
 
-        <!-- Global Navigation -->
+        <!-- Global Navigation (Desktop) -->
         <nav class="bg-blue-900 text-white shadow-inner hidden md:block">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between text-sm font-semibold">
@@ -161,102 +212,158 @@
         </nav>
     </header>
 
-    <!-- Mobile Drawer Navigation -->
-    <div id="mobileDrawer" class="fixed inset-0 z-50 bg-black/50 hidden">
-        <div class="fixed left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white p-5 overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center pb-4 border-b">
-                <span class="font-bold text-lg text-blue-900">{{ settings.COMPANY_NAME }}</span>
-                <button id="closeDrawerBtn" class="text-gray-500 hover:text-gray-800 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="my-4">
-                <form action="/search" method="get">
-                    <input type="text" name="q" placeholder="상품 검색..." class="w-full px-3 py-2 border rounded-lg text-sm">
-                </form>
-            </div>
-            <div class="mb-4 space-y-2">
-                <a href="/quotes/new" class="block text-center py-2.5 bg-amber-500 text-white font-bold text-xs rounded-lg shadow-sm">
-                    온라인 견적신청
-                </a>
-                <div class="grid grid-cols-3 gap-1.5 pt-1">
-                    <a href="/board/notice" class="py-1.5 bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded">공지사항</a>
-                    <a href="/board/faq" class="py-1.5 bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded">FAQ</a>
-                    <a href="/board/qna" class="py-1.5 bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded">Q&A</a>
+    <!-- Mobile Drawer Navigation (Slide-over) -->
+    <div id="mobileDrawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden transition-opacity duration-300">
+        <div id="drawerContent" class="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-white p-5 overflow-y-auto shadow-2xl flex flex-col justify-between transform transition-transform duration-300 -translate-x-full">
+            <div>
+                <!-- Drawer Header -->
+                <div class="flex justify-between items-center pb-4 border-b border-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white font-black text-sm">
+                            BS
+                        </div>
+                        <span class="font-bold text-base text-blue-950">{{ settings.COMPANY_NAME }}</span>
+                    </div>
+                    <button id="closeDrawerBtn" type="button" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition" aria-label="메뉴 닫기">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Drawer Search -->
+                <div class="my-4">
+                    <form action="/search" method="get" class="relative">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            placeholder="상품 검색 (예: 탁상, 풍경)..." 
+                            class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:bg-white"
+                        >
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400 text-xs"></i>
+                    </form>
+                </div>
+
+                <!-- Fast Actions -->
+                <div class="mb-5 space-y-2">
+                    <a href="/quotes/new" class="block text-center py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition">
+                        <i class="fa-solid fa-file-signature mr-1.5"></i>온라인 견적 및 주문신청
+                    </a>
+                    <div class="grid grid-cols-3 gap-1.5 pt-1">
+                        <a href="/board/notice" class="py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded-lg border border-gray-100 transition">공지사항</a>
+                        <a href="/board/faq" class="py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded-lg border border-gray-100 transition">FAQ</a>
+                        <a href="/board/qna" class="py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded-lg border border-gray-100 transition">Q&A</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <a href="/quotes" class="py-2 bg-blue-50 text-blue-800 hover:bg-blue-100 text-center text-xs font-bold rounded-lg border border-blue-100 transition">견적게시판</a>
+                        <a href="/company" class="py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-center text-xs font-semibold rounded-lg border border-gray-100 transition">회사소개</a>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>카테고리 전체보기</span>
+                    <span class="text-[10px] text-blue-600">{{ categories|length }}개 분류</span>
+                </div>
+                <div class="space-y-0.5 divide-y divide-gray-50">
+                    {% for cat in categories %}
+                    <a href="/category/{{ cat.slug }}" class="flex justify-between items-center py-2.5 px-2 text-xs font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 rounded-lg transition">
+                        <span class="truncate">■ {{ cat.name }}</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0 ml-2">{{ cat.product_count }}</span>
+                    </a>
+                    {% endfor %}
                 </div>
             </div>
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">카테고리</div>
-            <div class="space-y-1">
-                {% for cat in categories %}
-                <a href="/category/{{ cat.slug }}" class="flex justify-between items-center py-2 text-sm text-gray-700 hover:text-blue-600 border-b border-gray-100">
-                    <span>■ {{ cat.name }}</span>
-                    <span class="text-xs text-gray-400">{{ cat.product_count }}</span>
-                </a>
-                {% endfor %}
-            </div>
 
-            <!-- Webhard Info in Mobile Drawer -->
-            <div class="mt-6 pt-4 border-t border-gray-100">
+            <!-- Drawer Bottom: Webhard & Admin -->
+            <div class="mt-6 pt-4 border-t border-gray-100 space-y-3">
+                <!-- Webhard Info in Mobile Drawer -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-slate-800 flex items-center">
-                            <i class="fa-solid fa-cloud-arrow-up mr-1 text-cyan-500"></i>웹하드 / 파일접수
+                            <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-cyan-600"></i>웹하드 / 파일접수
                         </span>
-                        <a href="{{ settings.WEBHARD_URL }}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-blue-600 font-bold hover:underline">
+                        <a href="{{ settings.WEBHARD_URL }}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-blue-600 font-bold hover:underline">
                             접속하기 ↗
                         </a>
                     </div>
-                    <div class="space-y-1 font-mono text-[11px] bg-white p-2 rounded border border-slate-200">
-                        <div class="flex justify-between">
+                    <div class="space-y-1 font-mono text-[11px] bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="flex justify-between items-center">
                             <span>ID: <strong>{{ settings.WEBHARD_ID }}</strong></span>
-                            <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_ID }}', '웹하드 아이디가 복사되었습니다.')" class="text-[10px] text-blue-600 font-sans">복사</button>
+                            <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_ID }}', '웹하드 아이디가 복사되었습니다.')" class="text-[10px] px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-blue-700 font-sans rounded">복사</button>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span>PW: <strong>{{ settings.WEBHARD_PW }}</strong></span>
-                            <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_PW }}', '웹하드 비밀번호가 복사되었습니다.')" class="text-[10px] text-blue-600 font-sans">복사</button>
+                            <button type="button" onclick="copyToClipboard('{{ settings.WEBHARD_PW }}', '웹하드 비밀번호가 복사되었습니다.')" class="text-[10px] px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-blue-700 font-sans rounded">복사</button>
                         </div>
                     </div>
                     <div class="text-[10px] text-gray-500">
                         E-mail: <a href="mailto:{{ settings.EMAIL_SECONDARY }}" class="text-emerald-700 font-semibold underline">{{ settings.EMAIL_SECONDARY }}</a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Admin Shortcut in Mobile Drawer -->
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                {% if is_admin %}
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                        <div class="text-xs font-bold text-blue-900 flex items-center">
-                            <i class="fa-solid fa-user-shield mr-1.5 text-blue-600"></i>관리자 로그인 중
+                <!-- Admin Shortcut in Mobile Drawer -->
+                <div>
+                    {% if is_admin %}
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-bold text-blue-900 flex items-center">
+                                <i class="fa-solid fa-user-shield mr-1.5 text-blue-600"></i>관리자 로그인 중
+                            </div>
+                            <p class="text-[11px] text-blue-700 mt-0.5">{{ admin_name or '관리자' }} 님</p>
                         </div>
-                        <p class="text-[11px] text-blue-700 mt-0.5">{{ admin_name or '관리자' }} 님</p>
+                        <div class="flex items-center space-x-2">
+                            <a href="/admin" class="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
+                                관리센터
+                            </a>
+                            <a href="/admin/logout" class="px-2 py-1.5 text-gray-500 hover:text-rose-600 text-xs transition" title="로그아웃">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </a>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <a href="/admin" class="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
-                            관리센터
-                        </a>
-                        <a href="/admin/logout" class="px-2 py-1.5 text-gray-500 hover:text-rose-600 text-xs transition" title="로그아웃">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </a>
-                    </div>
+                    {% else %}
+                    <a href="/admin/login" class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 text-gray-700 text-xs font-medium transition">
+                        <span class="flex items-center"><i class="fa-solid fa-lock text-gray-500 mr-2"></i>관리자 로그인</span>
+                        <i class="fa-solid fa-chevron-right text-gray-400 text-[10px]"></i>
+                    </a>
+                    {% endif %}
                 </div>
-                {% else %}
-                <a href="/admin/login" class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 text-gray-700 text-xs font-medium transition">
-                    <span class="flex items-center"><i class="fa-solid fa-lock text-gray-500 mr-2"></i>관리자 로그인</span>
-                    <i class="fa-solid fa-chevron-right text-gray-400 text-[10px]"></i>
-                </a>
-                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Main Content Body -->
-    <main class="flex-1">
+    <!-- Main Content Body (with padding-bottom on mobile for sticky bottom bar) -->
+    <main class="flex-1 pb-16 md:pb-0">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Mobile Bottom Fixed Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg py-1 px-2 flex justify-around items-center safe-area-bottom">
+        <a href="/" class="flex flex-col items-center py-1 px-3 text-gray-600 hover:text-blue-600 transition">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] mt-1 font-medium">홈</span>
+        </a>
+        <button type="button" onclick="openDrawer()" class="flex flex-col items-center py-1 px-3 text-gray-600 hover:text-blue-600 transition">
+            <i class="fa-solid fa-bars text-base"></i>
+            <span class="text-[10px] mt-1 font-medium">카테고리</span>
+        </button>
+        <a href="/quotes/new" class="flex flex-col items-center -mt-5 group">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-amber-400 text-white flex items-center justify-center shadow-lg group-hover:scale-105 transition border-2 border-white">
+                <i class="fa-solid fa-file-signature text-base"></i>
+            </div>
+            <span class="text-[10px] mt-0.5 font-bold text-amber-600">견적신청</span>
+        </a>
+        <a href="tel:{{ settings.TEL }}" class="flex flex-col items-center py-1 px-3 text-gray-600 hover:text-emerald-600 transition">
+            <i class="fa-solid fa-phone text-base"></i>
+            <span class="text-[10px] mt-1 font-medium">전화상담</span>
+        </a>
+        <a href="/quotes" class="flex flex-col items-center py-1 px-3 text-gray-600 hover:text-blue-600 transition">
+            <i class="fa-solid fa-comments text-base"></i>
+            <span class="text-[10px] mt-1 font-medium">견적게시판</span>
+        </a>
+    </nav>
+
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 mt-16 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer class="bg-gray-900 text-gray-300 mt-12 sm:mt-16 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <!-- Col 1: Brand & Intro -->
                 <div class="md:col-span-2">
@@ -264,7 +371,7 @@
                         <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">BS</div>
                         <span class="text-xl font-bold text-white">{{ settings.COMPANY_NAME }}</span>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-4">
                         보성문화카렌다사는 엄선된 고품질 지질과 정밀한 옵셋 인쇄 기술로 기업 및 단체의 브랜드 가치를 높여드리는 캘린더 제작 전문 기업입니다.
                     </p>
                     <div class="text-xs text-gray-400 space-y-1">
@@ -276,31 +383,33 @@
 
                 <!-- Col 2: Customer Center & Webhard -->
                 <div>
-                    <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-3">고객센터</h3>
-                    <div class="text-2xl font-black text-amber-400 mb-2">{{ settings.TEL }}</div>
+                    <h3 class="text-white font-bold text-xs uppercase tracking-wider mb-3">고객센터</h3>
+                    <div class="text-2xl font-black text-amber-400 mb-1">
+                        <a href="tel:{{ settings.TEL }}" class="hover:underline">{{ settings.TEL }}</a>
+                    </div>
                     <p class="text-xs text-gray-400">팩스: {{ settings.FAX }}</p>
                     <p class="text-xs text-gray-400 mt-1">상담시간: 평일 09:00 ~ 18:00</p>
                     <p class="text-xs text-gray-400">토/일/공휴일 휴무</p>
 
                     <!-- Webhard & Email in Footer -->
-                    <div class="mt-4 pt-3 border-t border-gray-800 space-y-1">
+                    <div class="mt-4 pt-3 border-t border-gray-800 space-y-1.5">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-cyan-400 flex items-center">
-                                <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-xs"></i>웹하드 접수
+                                <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-xs"></i>웹하드 파일접수
                             </span>
                             <a href="{{ settings.WEBHARD_URL }}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-cyan-300 hover:underline">
                                 바로가기 ↗
                             </a>
                         </div>
                         <p class="text-[11px] text-gray-300 font-mono">ID: {{ settings.WEBHARD_ID }} / PW: {{ settings.WEBHARD_PW }}</p>
-                        <p class="text-[11px] text-gray-400">E-mail: {{ settings.EMAIL_SECONDARY }}</p>
+                        <p class="text-[11px] text-gray-400">E-mail: <a href="mailto:{{ settings.EMAIL_SECONDARY }}" class="text-emerald-400 hover:underline">{{ settings.EMAIL_SECONDARY }}</a></p>
                     </div>
                 </div>
 
                 <!-- Col 3: Quick Links -->
                 <div>
-                    <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-3">빠른 메뉴</h3>
-                    <ul class="text-sm space-y-2">
+                    <h3 class="text-white font-bold text-xs uppercase tracking-wider mb-3">빠른 메뉴</h3>
+                    <ul class="text-xs space-y-2">
                         <li><a href="/board/notice" class="hover:text-white transition">공지사항</a></li>
                         <li><a href="/board/faq" class="hover:text-white transition">자주 묻는 질문 (FAQ)</a></li>
                         <li><a href="/board/qna" class="hover:text-white transition">질문과 답변 (Q&A)</a></li>
@@ -311,7 +420,7 @@
                 </div>
             </div>
 
-            <div class="pt-8 border-t border-gray-800 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="pt-6 sm:pt-8 border-t border-gray-800 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span>Copyright © 2004~2026 {{ settings.COMPANY_NAME }}. All rights reserved.</span>
                 <a href="/admin" class="text-gray-500 hover:text-gray-300 transition flex items-center">
                     <i class="fa-solid fa-gear text-[11px] mr-1"></i>관리자 시스템
